@@ -6,27 +6,27 @@ if ! command -v go &> /dev/null; then
     exit 1
 fi
 
+# remove existing installation if present
+if [ -f ~/.swan/swan ]; then
+    rm ~/.swan/swan
+    echo "removing existing swan installation"
+fi
+
 # create .swan directory in home
 mkdir -p ~/.swan
 
 # get the code and build
 cd $(mktemp -d)
-go install github.com/rAlexander89/swan@latest
+GOBIN=~/.swan go install github.com/rAlexander89/swan@latest
 
-# ensure GOBIN is in PATH for zsh
+# ensure paths are set in zshrc
 SHELL_RC="$HOME/.zshrc"
 if ! grep -q 'export PATH="$HOME/.swan:$PATH"' "$SHELL_RC"; then
     echo 'export PATH="$HOME/.swan:$PATH"' >> "$SHELL_RC"
 fi
 
-if ! grep -q 'export PATH="$HOME/go/bin:$PATH"' "$SHELL_RC"; then
-    echo 'export PATH="$HOME/go/bin:$PATH"' >> "$SHELL_RC"
-fi
-
-# move binary to .swan
-mv ~/go/bin/swan ~/.swan/
+# export path for current session
+export PATH="$HOME/.swan:$PATH"
 
 echo "swan CLI installed successfully"
-echo "restart your terminal or run: source $SHELL_RC"
-
-
+echo "try running: swan"
