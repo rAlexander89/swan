@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -15,8 +16,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	// get gopath
-	goPath := os.Getenv("GOPATH")
+	// get gopath using go env command instead of environment variable
+	cmd := exec.Command("go", "env", "GOPATH")
+	goPathBytes, err := cmd.Output()
+	if err != nil {
+		fmt.Println("error getting gopath:", err)
+		os.Exit(1)
+	}
+
+	// trim whitespace and newlines from gopath
+	goPath := strings.TrimSpace(string(goPathBytes))
+
 	if goPath == "" {
 		fmt.Println("gopath not set")
 		os.Exit(1)
@@ -26,7 +36,7 @@ func main() {
 	if strings.HasPrefix(pwd, goPath) {
 		fmt.Println("nice")
 	} else {
-		fmt.Println("current directory is not in gopath")
+		fmt.Printf("current directory (%s) is not in gopath (%s)\n", pwd, goPath)
 		os.Exit(1)
 	}
 }
