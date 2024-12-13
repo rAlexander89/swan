@@ -21,12 +21,20 @@ GOBIN=~/.swan go install github.com/rAlexander89/swan@latest
 
 # ensure paths are set in zshrc
 SHELL_RC="$HOME/.zshrc"
+
+# ensure GOPATH is set
+if ! grep -q 'export GOPATH="$HOME/go"' "$SHELL_RC"; then
+    echo 'export GOPATH="$HOME/go"' >> "$SHELL_RC"
+fi
+
 if ! grep -q 'export PATH="$HOME/.swan:$PATH"' "$SHELL_RC"; then
     echo 'export PATH="$HOME/.swan:$PATH"' >> "$SHELL_RC"
 fi
 
 # export path for current session
 export PATH="$HOME/.swan:$PATH"
+export GOPATH="$HOME/go"
 
 echo "swan CLI installed successfully"
 echo "try running: swan"
+
