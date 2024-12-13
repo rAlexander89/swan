@@ -15,17 +15,21 @@ fi
 # create .swan directory in home
 mkdir -p ~/.swan
 
-# get the code and build
-cd $(mktemp -d)
+# store original directory
+ORIGINAL_DIR=$(pwd)
+
+# create temp dir but store its path
+TEMP_DIR=$(mktemp -d)
+
+# do installation work in temp dir
+cd "$TEMP_DIR"
 GOBIN=~/.swan go install github.com/rAlexander89/swan@latest
+
+# go back to original directory
+cd "$ORIGINAL_DIR"
 
 # ensure paths are set in zshrc
 SHELL_RC="$HOME/.zshrc"
-
-# ensure GOPATH is set
-if ! grep -q 'export GOPATH="$HOME/go"' "$SHELL_RC"; then
-    echo 'export GOPATH="$HOME/go"' >> "$SHELL_RC"
-fi
 
 if ! grep -q 'export PATH="$HOME/.swan:$PATH"' "$SHELL_RC"; then
     echo 'export PATH="$HOME/.swan:$PATH"' >> "$SHELL_RC"
@@ -33,8 +37,9 @@ fi
 
 # export path for current session
 export PATH="$HOME/.swan:$PATH"
-export GOPATH="$HOME/go"
 
 echo "swan CLI installed successfully"
 echo "try running: swan"
 
+# cleanup temp directory
+rm -rf "$TEMP_DIR"
