@@ -22,9 +22,9 @@ type Config struct {
 	File     string `json:"file"`
 	Function string `json:"function"`
 	Args     *[]struct {
-		Name     string `json:"name"`
-		Type     string `json:"type"`
-		Required bool   `json:"required"`
+		Name     *string `json:"name"`
+		Type     *string `json:"type"`
+		Required bool    `json:"required"`
 	} `json:"args,omitempty"`
 }
 
