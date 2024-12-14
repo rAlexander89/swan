@@ -8,7 +8,24 @@
       "config": {
         "package": "commands/birb",
         "file": "honk.go",
-        "function": "Honk"
+        "function": "Honk",
+        "args": null
+      },
+      "branches": {}
+    },
+    "says": {
+      "name": "says",
+      "config": {
+        "package": "commands/birb",
+        "file": "honk.go",
+        "function": "Says",
+        "args": [
+          {
+            "name": null,
+            "type": "string",
+            "required": true
+          }
+        ]
       },
       "branches": {}
     }
