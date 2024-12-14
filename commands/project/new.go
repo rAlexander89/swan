@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/rAlexander89/swan/nodes"
 )
 
 //go:embed new.json
@@ -16,6 +18,10 @@ var projectStructure []byte
 type FileStructure struct {
 	Type     string                   `json:"type"`
 	Children map[string]FileStructure `json:"children,omitempty"`
+}
+
+func init() {
+	nodes.RegisterCommand("new", New)
 }
 
 // New creates a new project directory and initializes a go module
