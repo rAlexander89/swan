@@ -28,6 +28,27 @@
         ]
       },
       "branches": {}
+    },
+    "new": {
+      "name": "new",
+      "config": {
+        "package": "commands/project",
+        "file": "new.go",
+        "function": "New",
+        "args": [
+          {
+            "name": "directory",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "project",
+            "type": "string",
+            "required": true
+          }
+        ]
+      },
+      "branches": {}
     }
   }
 }

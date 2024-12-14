@@ -1,0 +1,150 @@
+{
+  "cmd": {
+    "type": "directory",
+    "children": {
+      "main.go": {
+        "type": "file"
+      }
+    }
+  },
+  "configs": {
+    "type": "directory",
+    "children": {
+      "dev.json": {
+        "type": "file"
+      },
+      "stg.json": {
+        "type": "file"
+      },
+      "prod.json": {
+        "type": "file"
+      }
+    }
+  },
+  "internal": {
+    "type": "directory",
+    "children": {
+      "app": {
+        "type": "directory",
+        "children": {
+          "adapters": {
+            "type": "directory",
+            "children": {
+              "cache": {
+                "type": "directory",
+                "children": {
+                  "mem_client": {
+                    "type": "directory"
+                  }
+                }
+              }
+            }
+          },
+          "handlers": {
+            "type": "directory",
+            "children": {
+              "kafka": {
+                "type": "directory",
+                "children": {
+                  "module.go": {
+                    "type": "file"
+                  },
+                  "service.go": {
+                    "type": "file"
+                  }
+                }
+              },
+              "api": {
+                "type": "directory",
+                "children": {
+                  "module.go": {
+                    "type": "file"
+                  },
+                  "controller.go": {
+                    "type": "file"
+                  }
+                }
+              }
+            }
+          },
+          "repositories": {
+            "type": "directory",
+            "children": {
+              "postgres": {
+                "type": "directory",
+                "children": {
+                  "connection.go": {
+                    "type": "file"
+                  },
+                  "module.go": {
+                    "type": "file"
+                  },
+                  "repository.go": {
+                    "type": "file"
+                  }
+                }
+              }
+            }
+          },
+          "module.go": {
+            "type": "file"
+          }
+        }
+      },
+      "core": {
+        "type": "directory",
+        "children": {
+          "domains": {
+            "type": "directory"
+          },
+          "ports": {
+            "type": "directory"
+          },
+          "services": {
+            "type": "directory",
+            "children": {
+              "module.go": {
+                "type": "file"
+              }
+            }
+          }
+        }
+      },
+      "infrastructure": {
+        "type": "directory",
+        "children": {
+          "config": {
+            "type": "directory",
+            "children": {
+              "config.go": {
+                "type": "file"
+              }
+            }
+          },
+          "server": {
+            "type": "directory",
+            "children": {
+              "server.go": {
+                "type": "file"
+              }
+            }
+          }
+        }
+      },
+      "app_module.go": {
+        "type": "file"
+      }
+    }
+  },
+  "db": {
+    "type": "directory",
+    "children": {
+      "migrations": {
+        "type": "directory"
+      }
+    }
+  },
+  "README.md": {
+    "type": "file"
+  }
+}
