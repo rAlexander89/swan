@@ -1,0 +1,16 @@
+{
+  "name": "swan",
+  "config": null,
+  "branches": {
+    "honk": {
+      "name": "honk",
+      "config": {
+        "package": "commands/birb",
+        "file": "honk.go",
+        "function": "Honk",
+        "args": null
+      },
+      "branches": {}
+    }
+  }
+}
