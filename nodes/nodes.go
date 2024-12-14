@@ -10,7 +10,7 @@ var nodesConfig []byte
 
 type Node struct {
 	Name      string               `json:"name"`
-	Prev      *Node                `json:"-"`
+	Prev      *Node                `json:"prev"`
 	Run       func([]string) error `json:"-"`
 	Config    *Config              `json:"config"`
 	BranchMap map[string]*Node     `json:"branches"`
