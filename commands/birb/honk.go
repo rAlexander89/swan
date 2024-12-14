@@ -19,7 +19,6 @@ func Honk([]string) error {
 }
 
 func Says(args []string) error {
-	// validate required argument as specified in nodes.json config
 	if len(args) < 1 {
 		return fmt.Errorf("swan needs something to say")
 	}
