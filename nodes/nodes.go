@@ -1,11 +1,12 @@
 package nodes
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 )
 
-// go:embed nodes.json
+//go:embed nodes.json
 var nodesConfig []byte
 
 type Node struct {
