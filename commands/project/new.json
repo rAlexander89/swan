@@ -144,12 +144,6 @@
       }
     }
   },
-  "go.mod": {
-    "type": "file"
-  },
-  "makefile": {
-    "type": "file"
-  },
   "README.md": {
     "type": "file"
   }

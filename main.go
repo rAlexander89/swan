@@ -6,6 +6,7 @@ import (
 	"os"
 
 	_ "github.com/rAlexander89/swan/commands/birb"
+	_ "github.com/rAlexander89/swan/commands/project"
 	"github.com/rAlexander89/swan/nodes"
 )
 
@@ -37,21 +38,24 @@ func main() {
 
 	// get the command from args
 	cmd := args[0]
+	remainingArgs := args[1:]
 
 	// find node and get registered function
-	if node, exists := root.BranchMap[cmd]; exists {
-		if fn, exists := nodes.GetCommand(cmd); exists {
-			node.Run = fn
-			if err := node.Run(args[1:]); err != nil {
-				fmt.Printf("error executing command: %v\n", err)
-				os.Exit(1)
-			}
-		} else {
-			fmt.Printf("command %s not implemented\n", cmd)
-			os.Exit(1)
-		}
-	} else {
+	node, exists := root.BranchMap[cmd]
+	if !exists {
 		fmt.Printf("unknown command: %s\n", cmd)
+		os.Exit(1)
+	}
+
+	fn, fnExists := nodes.GetCommand(cmd)
+	if !fnExists {
+		fmt.Printf("command %s not implemented\n", cmd)
+		os.Exit(1)
+	}
+	node.Run = fn
+
+	if err := node.Run(remainingArgs); err != nil {
+		fmt.Printf("error executing command: %v\n", err)
 		os.Exit(1)
 	}
 }
