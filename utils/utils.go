@@ -113,7 +113,7 @@ func PascalToLower(s string) string {
 	result.WriteString(strings.ToLower(string(s[1])))
 
 	// iterate starting from second character
-	for i := 1; i < len(s); i++ {
+	for i := 0; i < len(s); i++ {
 		if unicode.IsUpper(rune(s[i])) {
 			result.WriteRune('_')
 			result.WriteString(strings.ToLower(string(s[i])))

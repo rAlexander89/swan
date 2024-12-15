@@ -75,7 +75,7 @@ func Create(args []string) error {
 	// create domain file content
 	domainContent := fmt.Sprintf(
 		`// %s.go
-  package %sDomain
+  package %s
 
   type %s struct {
     %s
