@@ -64,7 +64,7 @@
           }
         ]
       },
-      "branches": {}
+      "branches": {},
     },
     "db": {
       "name": "db",
@@ -81,17 +81,21 @@
                          "file": "postgres.go",
                          "function": "Connect",
                          "args": [
+                            {
                              "e": {
                                  "type": "string",
                                  "required": false
                              },
-                             "u": {
-                                 "type": "string", 
-                                 "required": false
-                             }
+                            },
+                            {          
+                              "u": {
+                                   "type": "string", 
+                                   "required": false
+                               }
+                            },
                          ]
-                     },
-                     "branches": {}
+                    },                     
+                    "branches": {}
                  }
              }
          }
