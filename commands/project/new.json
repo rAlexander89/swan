@@ -143,12 +143,10 @@
         "type": "directory"
       }
     }
-  },
-  {
+  }, 
   ".env": {
     "type": "file",
   },
-},
   "README.md": {
     "type": "file"
   }
