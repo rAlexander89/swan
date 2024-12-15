@@ -27,11 +27,13 @@ func Create(args []string) error {
 		return errors.New("expected at least 1 argument: domain name")
 	}
 
-	domain := strings.ToLower(args[0])
+	domain := args[0] // SomeDomain
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("failed to get current directory: %v", err)
 	}
+	fileName := utils.PascalToSnake(domain) // Some_Domain
+	fileName = strings.ToLower(fileName)    // some_domain
 	domainPath := filepath.Join(currentDir, "internal", "core", "domains", domain)
 
 	fmt.Printf("generating new domain %s", domain)
@@ -81,10 +83,10 @@ func Create(args []string) error {
     %s
   }
   `,
-		utils.ToSnakeCase(domain),   // domain_name.go
-		utils.PascalToLower(domain), // pacakge domainname
-		domain,                      // type PublicDomain struct
-		structFields,                // struct fields
+		fileName,                // domain_name.go
+		strings.ToLower(domain), // pacakge domainname
+		domain,                  // type PublicDomain struct
+		structFields,            // struct fields
 	)
 
 	// write domain file

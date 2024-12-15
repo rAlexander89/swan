@@ -102,6 +102,21 @@ func SnakeToPascal(s string) string {
 	return pascalCase
 }
 
+func PascalToSnake(s string) string {
+	var result strings.Builder
+	var prev rune
+
+	for i, r := range s {
+		if i > 0 && unicode.IsUpper(r) && prev != '_' && !unicode.IsUpper(prev) {
+			result.WriteRune('_')
+		}
+		result.WriteRune(unicode.ToLower(r))
+		prev = r
+	}
+
+	return result.String()
+}
+
 func PascalToLower(s string) string {
 	// handle empty string case
 	if len(s) == 0 {
