@@ -34,7 +34,7 @@ func Create(args []string) error {
 	}
 	fileName := utils.PascalToSnake(domain) // Some_Domain
 	fileName = strings.ToLower(fileName)    // some_domain
-	domainPath := filepath.Join(currentDir, "internal", "core", "domains", domain)
+	domainPath := filepath.Join(currentDir, "internal", "core", "domains", fileName)
 
 	fmt.Printf("generating new domain %s", domain)
 
@@ -80,7 +80,7 @@ func Create(args []string) error {
   package %s
 
   type %s struct {
-    %s
+  %s
   }
   `,
 		fileName,                // domain_name.go
@@ -94,6 +94,8 @@ func Create(args []string) error {
 	if err := os.WriteFile(domainFile, []byte(domainContent), 0644); err != nil {
 		return fmt.Errorf("failed to create domain file: %v", err)
 	}
+
+	fmt.Printf("%s domain created in ./internal/core/domain/%s/%s.go", domain, fileName, fileName)
 
 	return nil
 }
