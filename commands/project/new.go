@@ -8,7 +8,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/rAlexander89/swan/nodes"
 )
+
+func init() {
+	nodes.RegisterCommand("new", New)
+}
 
 //go:embed new.json
 var projectStructure []byte
