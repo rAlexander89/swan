@@ -72,6 +72,13 @@ func New(args []string) error {
 		return fmt.Errorf("failed to scaffold project directories: %v", err)
 	}
 
+	// write config env.jsons and config structs
+	if err := WriteConfig(projectPath); err != nil {
+		return fmt.Errorf("failed to write config files: %v", err)
+	}
+
+	// before go mod init
+
 	fmt.Printf("successfully created new project at %s\n", projectPath)
 	return nil
 }
