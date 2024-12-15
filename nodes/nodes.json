@@ -64,7 +64,7 @@
           }
         ]
       },
-      "branche": {}
+      "branches": {}
     },
     "db": {
       "name": "db",
