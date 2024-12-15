@@ -63,7 +63,8 @@
             "required": true
           }
         ]
-      }
+      },
+      "branche": {}
     },
     "db": {
       "name": "db",
@@ -79,7 +80,7 @@
                          "package": "commands/db",
                          "file": "postgres.go",
                          "function": "Connect",
-                         "args": {
+                         "args": [
                              "e": {
                                  "type": "string",
                                  "required": false
@@ -88,7 +89,7 @@
                                  "type": "string", 
                                  "required": false
                              }
-                         }
+                         ]
                      },
                      "branches": {}
                  }
