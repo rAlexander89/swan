@@ -49,6 +49,21 @@
         ]
       },
       "branches": {}
+    },
+    "domain": {
+      "name": "domain",
+      "config": {
+        "package": "commands/domain",
+        "file": "domain.go",
+        "function": "Create",
+        "args": [
+          {
+            "name": "domain",
+            "type": "string",
+            "required": true
+          }
+        ]
+      }
     }
   }
 }

@@ -12,6 +12,10 @@ import (
 	"github.com/rAlexander89/swan/nodes"
 )
 
+func init() {
+	nodes.RegisterCommand("new", New)
+}
+
 //go:embed new.json
 var projectStructure []byte
 
@@ -20,11 +24,7 @@ type FileStructure struct {
 	Children map[string]FileStructure `json:"children,omitempty"`
 }
 
-func init() {
-	nodes.RegisterCommand("new", New)
-}
-
-// New creates a new project directory and initializes a go module
+// creates a new project directory and initializes a go module
 func New(args []string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("expected 2 arguments: directory name and project name")
