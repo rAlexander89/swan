@@ -7,8 +7,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/rAlexander89/swan/nodes"
 	"github.com/rAlexander89/swan/utils"
 )
+
+func init() {
+	nodes.RegisterCommand("domain", Create)
+}
 
 // creates a new domain
 
