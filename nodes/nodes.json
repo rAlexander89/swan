@@ -64,6 +64,36 @@
           }
         ]
       }
-    }
+    },
+    "db": {
+      "name": "db",
+      "config": null,
+      "branches": {
+         "connect": {
+             "name": "connect",
+             "config": null,
+             "branches": {
+                 "postgres": {
+                     "name": "postgres",
+                     "config": {
+                         "package": "commands/db",
+                         "file": "postgres.go",
+                         "function": "Connect",
+                         "args": {
+                             "e": {
+                                 "type": "string",
+                                 "required": false
+                             },
+                             "u": {
+                                 "type": "string", 
+                                 "required": false
+                             }
+                         }
+                     },
+                     "branches": {}
+                 }
+             }
+         }
+      }
   }
 }
