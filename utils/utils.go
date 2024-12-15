@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"unicode"
@@ -123,4 +124,61 @@ func PascalToLower(s string) string {
 	}
 
 	return result.String()
+}
+
+// ParseArgFields takes an array of args and returns fields until it hits a flag
+func ParseArgFields(args []string, startIndex int) ([]Field, error) {
+	var fields []Field
+	i := startIndex
+
+	// collect args until we hit a flag or end
+	for ; i < len(args); i++ {
+		// stop if we hit a flag
+		if strings.HasPrefix(args[i], "-") {
+			break
+		}
+
+		// need at least 2 more args for a field
+		if i+1 >= len(args) {
+			return nil, errors.New("incomplete field definition")
+		}
+
+		// clean any trailing commas
+		name := strings.TrimSuffix(args[i], ",")
+		dataType := strings.TrimSuffix(args[i+1], ",")
+
+		fields = append(fields, Field{
+			Name:     name,
+			DataType: dataType,
+		})
+
+		// skip the type arg since we used it
+		i++
+	}
+
+	if len(fields) == 0 {
+		return nil, errors.New("no fields provided")
+	}
+
+	// return the last processed index so caller knows where to continue
+	return fields, nil
+}
+
+func ParseArgTags(args []string, startIndex int) ([]string, error) {
+	var tags []string
+	i := startIndex
+
+	for ; i < len(args); i++ {
+		if strings.HasPrefix(args[i], "-") {
+			break
+		}
+		tag := strings.TrimSuffix(args[i], ",")
+		tags = append(tags, tag)
+	}
+
+	if len(tags) == 0 {
+		return nil, errors.New("no tags provided")
+	}
+
+	return tags, nil
 }

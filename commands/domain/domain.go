@@ -15,10 +15,6 @@ func init() {
 	nodes.RegisterCommand("domain", Create)
 }
 
-// creates a new domain
-
-// possible args
-
 type domainArgs struct {
 	name     string
 	argType  string
@@ -31,35 +27,39 @@ func Create(args []string) error {
 		return errors.New("expected at least 1 argument: domain name")
 	}
 
-	// new domain
-	var fields []utils.Field
-	var tags []string
-
-	// start @ 1 to validate command args
-	for i := 1; i < len(args); i++ {
-		arg := args[i]
-		var err error
-
-		switch {
-		case strings.HasPrefix(arg, "-f"):
-			fields, err = utils.ParseFields(strings.TrimPrefix(arg, "-f="))
-			if err != nil {
-				return fmt.Errorf("failed to parse fields: %v ", err)
-			}
-		case strings.HasPrefix(arg, "-t"):
-			tags, err = utils.ParseTags(strings.TrimPrefix(arg, "-t="))
-			if err != nil {
-				return fmt.Errorf("failed to parse tags: %v", err)
-			}
-		}
-	}
-
 	domain := strings.ToLower(args[0])
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("failed to get current directory: %v", err)
 	}
 	domainPath := filepath.Join(currentDir, "internal", "core", "domains", domain)
+
+	fmt.Printf("generating new domain %s", domain)
+
+	// validate struct fields
+	var fields []utils.Field
+	var tags []string
+
+	// start @ 1. index 0 is the domain name
+	for i := 1; i < len(args); i++ {
+		arg := args[i]
+		var err error
+
+		switch arg {
+		case "-f":
+			fmt.Println("generating struct fields")
+			fields, err = utils.ParseArgFields(args, i+1)
+			if err != nil {
+				return fmt.Errorf("failed to parse fields: %v ", err)
+			}
+		case "-t":
+			fmt.Println("generating struct field tags")
+			tags, err = utils.ParseArgTags(args, i+1)
+			if err != nil {
+				return fmt.Errorf("failed to parse tags: %v", err)
+			}
+		}
+	}
 
 	if err := os.MkdirAll(domainPath, 0755); err != nil {
 		return fmt.Errorf("failed to create domain directory: %v", err)
