@@ -9,6 +9,7 @@ import (
 
 	"github.com/rAlexander89/swan/commands/project/port"
 	"github.com/rAlexander89/swan/commands/project/service"
+	"github.com/rAlexander89/swan/nodes"
 )
 
 // operation flags
@@ -19,6 +20,10 @@ const (
 	Delete = 'D'
 	Index  = 'I'
 )
+
+func init() {
+	nodes.RegisterCommand("hatch", Hatch)
+}
 
 type operation struct {
 	name     string

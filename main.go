@@ -8,6 +8,7 @@ import (
 	_ "github.com/rAlexander89/swan/commands/birb"
 	_ "github.com/rAlexander89/swan/commands/domain"
 	_ "github.com/rAlexander89/swan/commands/project"
+	_ "github.com/rAlexander89/swan/commands/project/db"
 	"github.com/rAlexander89/swan/nodes"
 )
 
