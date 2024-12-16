@@ -13,7 +13,7 @@ import (
 )
 
 func generateCreate(domain string) (string, error) {
-	structFields, sErr := getStructFields(domain) // We'll implement this next
+	structFields, sErr := getStructFields(domain)
 	if sErr != nil {
 		return "", fmt.Errorf("error reading struct fields for %s: %v ", domain, sErr)
 	}
@@ -28,44 +28,56 @@ func generateCreate(domain string) (string, error) {
 		valueBindings = append(valueBindings, fmt.Sprintf("%s.%s", strings.ToLower(domain), field.Name))
 	}
 
-	code := fmt.Sprintf(`package %s
+	projName, pErr := utils.GetProjectName()
+	if pErr != nil {
+		return "", pErr
+	}
+
+	// interplate values
+	// 1. domain string is already PascalCase
+	allLower := strings.ToLower(domain)
+	packageName := allLower
+
+	snake_case_domain := utils.PascalToSnake(domain)
+	fileName := snake_case_domain
+
+	code := fmt.Sprintf(`package %[1]s
 
 import (
-   "context"
-   "time"
-   "your_project/internal/core/domains/%s"
+    "context"
+    "time"
+    "%[2]s/internal/core/domains/%[3]s"
 )
 
-func (r *Repository) Create%s(ctx context.Context, %s *%s.%s) error {
-   query := `+"`"+`
-       insert into %ss (
-           %s
-       ) values (
-           %s
-       )
-   `+"`"+`
+func (r *Repository) Create%[4]s(ctx context.Context, %[1]s *%[1]s.%[4]s) error {
+    query := `+"`"+`
+        insert into %[5]s (
+            %[6]s
+        ) values (
+            %[7]s
+        )
+    `+"`"+`
 
-   now := time.Now().UTC()
-   %s.CreatedAt = now
-   %s.UpdatedAt = now
+    now := time.Now().UTC()
+    %[1]s.CreatedAt = now
+    %[1]s.UpdatedAt = now
 
-   _, err := r.conn.ExecContext(
-       ctx,
-       query,
-       %s,
-   )
+    _, err := r.conn.ExecContext(
+        ctx,
+        query,
+        %[8]s,
+    )
 
-   return err
+    return err
 }`,
-		domain, domain,
-		domain,
-		strings.ToLower(domain), domain, domain,
-		strings.ToLower(domain),
-		strings.Join(columns, ",\n            "),
-		strings.Join(placeholders, ",\n            "),
-		strings.ToLower(domain),
-		strings.ToLower(domain),
-		strings.Join(valueBindings, ",\n        "))
+		packageName,                           // [1] package name
+		projName,                              // [2] project import path
+		fileName,                              // [3] snake_case domain folder
+		domain,                                // [4] PascalCase type names
+		fmt.Sprintf("%ss", snake_case_domain), // [5] pluralized snake_case table
+		columns,                               // [6] column names
+		placeholders,                          // [7] sql placeholders
+		valueBindings)                         // [8] value bindings
 
 	return code, nil
 }
