@@ -10,6 +10,7 @@ import (
 	"github.com/rAlexander89/swan/commands/project/port"
 	"github.com/rAlexander89/swan/commands/project/service"
 	"github.com/rAlexander89/swan/nodes"
+	"github.com/rAlexander89/swan/utils"
 )
 
 // operation flags
@@ -36,7 +37,7 @@ func Hatch(args []string) error {
 		return fmt.Errorf("domain name required")
 	}
 
-	domain := strings.ToLower(args[0])
+	domain := args[0]
 	ops := "CRUDI"
 
 	// check for operations flag
@@ -63,8 +64,10 @@ func Hatch(args []string) error {
 		return fmt.Errorf("failed to get working directory: %v", err)
 	}
 
+	domain_snake := utils.PascalToSnake(domain)
+
 	// 1. postgres repository implementation
-	repoPath := filepath.Join(pwd, "internal", "app", "repositories", "postgres", "domains", domain)
+	repoPath := filepath.Join(pwd, "internal", "app", "repositories", "postgres", "domains", domain_snake)
 	if err := os.MkdirAll(repoPath, 0755); err != nil {
 		return fmt.Errorf("failed to create repository directory: %v", err)
 	}
