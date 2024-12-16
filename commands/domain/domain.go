@@ -90,7 +90,7 @@ func Create(args []string) error {
 	)
 
 	// write domain file
-	domainFile := filepath.Join(domainPath, domain+".go")
+	domainFile := filepath.Join(domainPath, fileName+".go")
 	if err := os.WriteFile(domainFile, []byte(domainContent), 0644); err != nil {
 		return fmt.Errorf("failed to create domain file: %v", err)
 	}
