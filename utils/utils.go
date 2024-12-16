@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"unicode"
 )
@@ -196,4 +197,24 @@ func ParseArgTags(args []string, startIndex int) ([]string, error) {
 	}
 
 	return tags, nil
+}
+
+func GetProjectName() (string, error) {
+	modBytes, err := os.ReadFile("go.mod")
+	if err != nil {
+		return "", fmt.Errorf("failed to read go.mod: %v", err)
+	}
+
+	lines := strings.Split(string(modBytes), "\n")
+	if len(lines) == 0 {
+		return "", fmt.Errorf("empty go.mod file")
+	}
+
+	// module line format: module github.com/user/project
+	moduleFields := strings.Fields(lines[0])
+	if len(moduleFields) != 2 {
+		return "", fmt.Errorf("invalid module declaration")
+	}
+
+	return moduleFields[1], nil
 }

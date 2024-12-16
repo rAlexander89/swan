@@ -66,6 +66,27 @@
       },
       "branches": {}
     },
+    "hatch": {
+      "name": "hatch",
+      "config": {
+        "package": "commands/db",
+        "file": "hatch.go",
+        "function": "Hatch",
+        "args": [
+          {
+            "name": "domain",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "operations",
+            "type": "string",
+            "flag": "c",
+            "required": false
+          }
+        ]
+      }
+    },
     "db": {
       "name": "db",
       "config": null,
