@@ -99,7 +99,7 @@ func Hatch(args []string) error {
 
 			operations = append(operations, operation{
 				name:     "create",
-				filename: fmt.Sprintf("%s_create.go", domain),
+				filename: fmt.Sprintf("%s_create.go", domain_snake),
 				content:  content,
 			})
 			// case Read:
