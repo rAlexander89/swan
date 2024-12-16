@@ -40,6 +40,7 @@ func GenerateRepositoryPort(domain string) error {
 
 import (
     "context"
+    "errors"
     
     "{{.Proj}}/internal/core/domains/{{.LowerDomain}}"
 )
