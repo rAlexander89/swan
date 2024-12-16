@@ -35,7 +35,7 @@ func getOperations(ops string) []operation {
 		case Create:
 			operations = append(operations, operation{
 				name:     "Create",
-				function: "Create%s(ctx context.Context, %s *%s.%s) error",
+				function: "Create%s(ctx context.Context, %s *%[2]s.%s) error", // not a fan that the interpolation happens elsewhere. difficult to debug
 			})
 		}
 		// case Read:
@@ -85,7 +85,7 @@ type %[3]sServiceImpl struct {
 }
 
 func New%[3]sService(repo repository.%[3]sRepository) %[3]sService {
-    return &%[2]sServiceImpl{
+    return &%[3]sServiceImpl{
         repo: repo,
     }
 }`, projectName, domainSnake, domain)
@@ -95,17 +95,17 @@ func New%[3]sService(repo repository.%[3]sRepository) %[3]sService {
 		case 'C':
 			content += fmt.Sprintf(`
 
-func (s *%[1]sServiceImpl) Create%[2]s(ctx context.Context, %[1]s *%[1]s.%[2]s) error {
+func (s *%[1]sServiceImpl) Create%[1]s(ctx context.Context, %[1]s *%[2]s.%[1]s) error {
     if %[1]s == nil {
-        return Err%[2]sInvalid
+        return Err%[1]sInvalid
     }
 
-    if err := s.repo.Create%[2]s(ctx, %[1]s); err != nil {
+    if err := s.repo.Create%[1]s(ctx, %[1]s); err != nil {
         return fmt.Errorf("failed to create %[1]s: %%w", err)
     }
 
     return nil
-}`, domainSnake, domain)
+}`, domain, strings.ToLower(domain))
 		}
 	}
 
