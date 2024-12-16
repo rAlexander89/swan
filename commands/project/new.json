@@ -92,7 +92,7 @@
           "services": {
             "type": "directory",
             "children": {
-              "serices.go": {
+              "services.go": {
                 "type": "file"
               }
             }
