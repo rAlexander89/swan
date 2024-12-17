@@ -81,6 +81,10 @@ func New(args []string) error {
 		return fmt.Errorf("failed to write config loader file: %v", err)
 	}
 
+	if err := WriteMain(projectPath); err != nil {
+		return fmt.Errorf("failed to write main.go: %v", err)
+	}
+
 	// before go mod init
 
 	fmt.Printf("successfully created new project at %s\n", projectPath)
