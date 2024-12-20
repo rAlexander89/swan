@@ -20,13 +20,9 @@ import (
     "context"
     "fmt"
     "log"
-    "os"
-    "os/signal"
-    "syscall"
-    "time"
 
-    "%s/internal/app"
     "%s/internal/infrastructure/config"
+    "%s/internal/infrastructure/server"
 )
 
 func main() {
@@ -37,36 +33,19 @@ func main() {
         log.Fatalf("failed to load config: %%v", err)
     }
 
-    // setup context with cancellation
-    ctx, cancel := context.WithCancel(context.Background())
-    defer cancel()
+    ctx := context.Background()
 
-    // initialize application
-    app, err := app.NewApp(ctx, cfg)
+    // initialize server
+    srv, err := server.NewServer(ctx, cfg)
     if err != nil {
-        log.Fatalf("failed to initialize application: %%v", err)
+        log.Fatalf("failed to initialize server: %%v", err)
     }
-    defer app.Shutdown()
-
-    // handle graceful shutdown
-    quit := make(chan os.Signal, 1)
-    signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-
-    go func() {
-        sig := <-quit
-        log.Printf("received signal: %%v", sig)
-        cancel()
-
-        // force shutdown after timeout
-        time.Sleep(10 * time.Second)
-        log.Fatal("forced shutdown after timeout")
-    }()
 
     fmt.Printf("starting application in %%s mode...\n", env)
 
-    // start application (blocking)
-    if err := app.Start(ctx); err != nil {
-        log.Fatalf("application error: %%v", err)
+    // start server (blocking)
+    if err := srv.Run("8080"); err != nil {
+        log.Fatalf("server error: %%v", err)
     }
 }`, projectName, projectName)
 
