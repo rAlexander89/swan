@@ -16,38 +16,39 @@ func WriteAppModule(projectPath string) error {
 
 	shutdownFuncStr := `
     func (a *App) Shutdown() error {
-      if a.postgresDB != nil {
-        if err := a.postgresDB.Close(); err != nil {
-          return fmt.Errorf("error closing postgres connection: %w", err)
+        if a.postgresDB != nil {
+            if err := a.postgresDB.Close(); err != nil {
+                return fmt.Errorf("error closing postgres connection: %w", err)
+            }
         }
-      }
-      return nil
+        return nil
     }
-  `
+    `
 
 	onceFuncStr := `
     once.Do(func() {
-      // initialize postgres repository
-      postgresConfig := postgres.Config{
-      URI:                   cfg.DB.Postgres.URI,
-      MaxOpenConnections:    cfg.DB.Postgres.MaxOpenConnections,
-      MaxIdleConnections:    cfg.DB.Postgres.MaxIdleConnections,
-      MaxConnectionIdleTime: cfg.DB.Postgres.MaxConnectionIdleTime,
-      MaxConnectionLifetime: cfg.DB.Postgres.MaxConnectionLifetime,
-    }
+        // initialize postgres repository
+        postgresConfig := postgres.Config{
+            URI:                   cfg.DB.Postgres.URI,
+            MaxOpenConnections:    cfg.DB.Postgres.MaxOpenConnections,
+            MaxIdleConnections:    cfg.DB.Postgres.MaxIdleConnections,
+            MaxConnectionIdleTime: cfg.DB.Postgres.MaxConnectionIdleTime,
+            MaxConnectionLifetime: cfg.DB.Postgres.MaxConnectionLifetime,
+        }
 
-    postgresDB, err := postgres.NewRepository(ctx, postgresConfig)
-    if err != nil {
-      initErr = fmt.Errorf("failed to initialize postgres repository: %w", err)
-      return
-    }
+        postgresDB, err := postgres.NewRepository(ctx, postgresConfig)
+        if err != nil {
+            initErr = fmt.Errorf("failed to initialize postgres repository: %w", err)
+            return
+        }
 
-    app = &App{
-      config:     cfg,
-      postgresDB: postgresDB,
-      }
+        app = &App{
+            config:     cfg,
+            postgresDB: postgresDB,
+        }
     })
-  `
+    `
+
 	appContent := fmt.Sprintf(`package app
 
 import (
@@ -94,7 +95,6 @@ func (a *App) PostgresDB() *postgres.Repository {
 }
 
 %s
-
 `, projectName, projectName, onceFuncStr, shutdownFuncStr)
 
 	appPath := filepath.Join(projectPath, "internal", "app", "app.go")

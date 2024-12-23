@@ -5,85 +5,155 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/rAlexander89/swan/utils"
 )
 
-func WriteHandler(projectPath, domain string) error {
+type handlerTemplate struct {
+	handler string
+}
+
+type templateData struct {
+	ProjectName string
+	PackageName string
+	DomainTitle string
+	DomainLower string
+	DomainSnake string
+	Operations  string
+}
+
+type handlerParts struct {
+	imports           string
+	handlerDefinition string
+	constructor       string
+	methods           string
+}
+
+const (
+	Create = 'C'
+	Read   = 'R'
+	Update = 'U'
+	Delete = 'D'
+	Index  = 'I'
+)
+
+func getHandlerParts(ops string) handlerParts {
+	parts := handlerParts{
+		imports: `package {{.PackageName}}
+
+import (
+    "encoding/json"
+    "net/http"
+    
+    "{{.ProjectName}}/internal/core/domains/{{.DomainLower}}"
+    "{{.ProjectName}}/internal/core/services/{{.DomainSnake}}_service/service"
+)`,
+
+		handlerDefinition: `
+type {{.DomainTitle}}Handler struct {
+    service service.{{.DomainTitle}}Service
+}`,
+
+		constructor: `
+func New{{.DomainTitle}}Handler(service service.{{.DomainTitle}}Service) *{{.DomainTitle}}Handler {
+    return &{{.DomainTitle}}Handler{
+        service: service,
+    }
+}`,
+	}
+
+	if strings.Contains(ops, string(Create)) {
+		parts.methods += `
+// Create handles POST requests to create a new {{.DomainLower}}
+func (h *{{.DomainTitle}}Handler) Create(w http.ResponseWriter, r *http.Request) {
+    var domain{{.DomainTitle}} {{.DomainLower}}.{{.DomainTitle}}
+    if err := json.NewDecoder(r.Body).Decode(&domain{{.DomainTitle}}); err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+    defer r.Body.Close()
+
+    if err := h.service.Create{{.DomainTitle}}(r.Context(), &domain{{.DomainTitle}}); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusCreated)
+    json.NewEncoder(w).Encode(domain{{.DomainTitle}})
+}`
+	}
+
+	return parts
+}
+
+func getHandlerTemplate(ops string) handlerTemplate {
+	parts := getHandlerParts(ops)
+
+	return handlerTemplate{
+		handler: strings.Join([]string{
+			parts.imports,
+			parts.handlerDefinition,
+			parts.constructor,
+			parts.methods,
+		}, "\n"),
+	}
+}
+
+func WriteHandler(projectPath, domain, ops string) error {
 	projectName, err := utils.GetProjectName()
 	if err != nil {
 		return fmt.Errorf("failed to get project name: %w", err)
 	}
 
-	// prepare names
-	domainLower := strings.ToLower(domain)
-	domainTitle := utils.ToUpperFirst(domain)
+	data := templateData{
+		ProjectName: projectName,
+		PackageName: strings.ToLower(domain),
+		DomainTitle: utils.ToUpperFirst(domain),
+		DomainLower: strings.ToLower(domain),
+		DomainSnake: utils.PascalToSnake(domain),
+		Operations:  ops,
+	}
 
-	handlerContent := fmt.Sprintf(`package api
-
-import (
-    "encoding/json"
-    "net/http"
-    "fmt"
-
-    "%s/internal/core/services/%s_service/service"
-)
-
-type Create%sRequest struct {
-    // TODO: add fields based on domain struct
-}
-
-type Create%sResponse struct {
-    ID string `+"`json:\"id\"`"+`
-}
-
-type %sHandler struct {
-    service service.%sService
-}
-
-func New%sHandler(service service.%sService) *%sHandler {
-    return &%sHandler{
-        service: service,
-    }
-}
-
-func (h *%sHandler) Create(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodPost {
-        http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-        return
-    }
-
-    var req Create%sRequest
-    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        http.Error(w, fmt.Sprintf("invalid request: %%v", err), http.StatusBadRequest)
-        return
-    }
-    defer r.Body.Close()
-
-    // TODO: map request to domain model and call service
-
-    resp := Create%sResponse{
-        ID: "generated-id", // TODO: get from service response
-    }
-
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusCreated)
-    if err := json.NewEncoder(w).Encode(resp); err != nil {
-        http.Error(w, fmt.Sprintf("error encoding response: %%v", err), http.StatusInternalServerError)
-        return
-    }
-}`, projectName, utils.PascalToSnake(domain), domainTitle, domainTitle, domainTitle, domainTitle, domainTitle, domainTitle, domainTitle, domainTitle, domainTitle, domainTitle, domainTitle)
-
-	// create handler directory if it doesn't exist
-	handlerDir := filepath.Join(projectPath, "internal", "app", "handlers", "api")
+	handlerDir := filepath.Join(
+		projectPath,
+		"internal",
+		"app",
+		"handlers",
+		"api",
+		data.DomainLower+"s",
+	)
 	if err := os.MkdirAll(handlerDir, 0755); err != nil {
 		return fmt.Errorf("failed to create handler directory: %v", err)
 	}
 
-	// write handler file
-	handlerPath := filepath.Join(handlerDir, fmt.Sprintf("%s_handler.go", domainLower))
-	if err := os.WriteFile(handlerPath, []byte(handlerContent), 0644); err != nil {
+	tmpl := getHandlerTemplate(ops)
+
+	if err := writeTemplateToFile(
+		filepath.Join(handlerDir, fmt.Sprintf("%s_handler.go", data.DomainLower)),
+		tmpl.handler,
+		data,
+	); err != nil {
 		return fmt.Errorf("failed to write handler file: %v", err)
+	}
+
+	return nil
+}
+
+func writeTemplateToFile(path, tmpl string, data templateData) error {
+	t, err := template.New("").Parse(tmpl)
+	if err != nil {
+		return fmt.Errorf("failed to parse template: %v", err)
+	}
+
+	f, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %v", err)
+	}
+	defer f.Close()
+
+	if err := t.Execute(f, data); err != nil {
+		return fmt.Errorf("failed to execute template: %v", err)
 	}
 
 	return nil
