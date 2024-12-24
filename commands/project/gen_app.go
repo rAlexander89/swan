@@ -3,11 +3,21 @@ package project
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/rAlexander89/swan/commands/project/app"
 	"github.com/rAlexander89/swan/utils"
 )
+
+func getPostgresDriver() error {
+	cmd := exec.Command("go", "get", "github.com/lib/pq")
+	_, err := cmd.Output()
+	if err != nil {
+		return fmt.Errorf("failed to get postgres driver: %v", err)
+	}
+	return nil
+}
 
 func WriteAppModule(projectPath string) error {
 	projectName, pErr := utils.GetProjectName()
@@ -20,6 +30,10 @@ func WriteAppModule(projectPath string) error {
 	}
 
 	if err := app.WritePostgresConnectionFile(projectPath); err != nil {
+		return err
+	}
+
+	if err := getPostgresDriver(); err != nil {
 		return err
 	}
 
