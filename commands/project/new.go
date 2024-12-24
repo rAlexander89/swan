@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/rAlexander89/swan/commands/project/server"
+	project "github.com/rAlexander89/swan/commands/project/server"
 	"github.com/rAlexander89/swan/nodes"
 )
 
@@ -90,7 +90,7 @@ func New(args []string) error {
 		return fmt.Errorf("failed to write app.go: %v", err)
 	}
 
-	if err := server.WriteServer(projectPath); err != nil {
+	if err := project.WriteServer(projectPath); err != nil {
 		return fmt.Errorf("failed to write server.go: %v", err)
 	}
 
