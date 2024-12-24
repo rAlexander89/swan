@@ -28,6 +28,7 @@ type handlerParts struct {
 	handlerDefinition string
 	constructor       string
 	methods           string
+	registration      string
 }
 
 const (
@@ -48,6 +49,7 @@ import (
     
     "{{.ProjectName}}/internal/core/domains/{{.DomainLower}}"
     "{{.ProjectName}}/internal/core/services/{{.DomainSnake}}_service/service"
+    "{{.ProjectName}}/internal/infrastructure/server"
 )`,
 
 		handlerDefinition: `
@@ -63,6 +65,13 @@ func New{{.DomainTitle}}Handler(service service.{{.DomainTitle}}Service) *{{.Dom
 }`,
 	}
 
+	// add registration method
+	parts.registration = `
+// RegisterRoutes implements the RouteRegistrar interface
+func (h *{{.DomainTitle}}Handler) RegisterRoutes(group *server.RouteGroup) error {
+    basePath := "/{{.DomainLower}}s"`
+
+	// add routes based on operations
 	if strings.Contains(ops, string(Create)) {
 		parts.methods += `
 // Create handles POST requests to create a new {{.DomainLower}}
@@ -82,7 +91,14 @@ func (h *{{.DomainTitle}}Handler) Create(w http.ResponseWriter, r *http.Request)
     w.WriteHeader(http.StatusCreated)
     json.NewEncoder(w).Encode(domain{{.DomainTitle}})
 }`
+
+		parts.registration += `
+    group.POST(basePath, h.Create)`
 	}
+
+	parts.registration += `
+    return nil
+}`
 
 	return parts
 }
@@ -96,6 +112,7 @@ func getHandlerTemplate(ops string) handlerTemplate {
 			parts.handlerDefinition,
 			parts.constructor,
 			parts.methods,
+			parts.registration,
 		}, "\n"),
 	}
 }

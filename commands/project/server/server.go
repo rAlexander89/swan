@@ -1,3 +1,4 @@
+// internal/project/gen_server.go
 package project
 
 import (
@@ -14,17 +15,41 @@ func WriteServer(projectPath string) error {
 		return fmt.Errorf("failed to get project name: %w", err)
 	}
 
-	serverStructStr := `
-type Server struct {
-    srv            *http.Server
-    mux            *http.ServeMux
-    app            *app.App
-    userService    service.UserService
-    middleware     []Middleware
-    wg             sync.WaitGroup
-}`
+	serverContent := fmt.Sprintf(`package server
 
-	middlewareTypeStr := `
+import (
+    "context"
+    "errors"
+    "fmt"
+    "log"
+    "net/http"
+    "os"
+    "os/signal"
+    "sync"
+    "syscall"
+    "time"
+    
+    "%s/internal/app"
+    "%s/internal/infrastructure/config"
+)
+
+type ServiceRegistrar interface {
+    RegisterServices(app *app.App) error
+}
+
+type RouteRegistrar interface {
+    RegisterRoutes(group *RouteGroup) error
+}
+
+type Server struct {
+    srv         *http.Server
+    mux         *http.ServeMux
+    app         *app.App
+    wg          sync.WaitGroup
+    middleware  []Middleware
+    routeGroups map[string]*RouteGroup
+}
+
 type Middleware func(http.HandlerFunc) http.HandlerFunc
 
 type RouteGroup struct {
@@ -33,35 +58,36 @@ type RouteGroup struct {
     middleware []Middleware
 }
 
-type RouteRegistrar interface {
-    RegisterRoutes(group *RouteGroup)
-}`
-
-	newServerStr := `
 func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
     application, err := app.NewApp(ctx, cfg)
     if err != nil {
-        return nil, fmt.Errorf("failed to initialize application: %w", err)
+        return nil, fmt.Errorf("failed to initialize application: %%w", err)
     }
 
-    // initialize services
-    userService := service.NewUserService(application.PostgresDB())
-
-    server := &Server{
+    return &Server{
         mux:         http.NewServeMux(),
         app:         application,
-        userService: userService,
         middleware:  make([]Middleware, 0),
+        routeGroups: make(map[string]*RouteGroup),
+    }, nil
+}
+
+func (s *Server) RegisterServices(registrar ServiceRegistrar) error {
+    if err := registrar.RegisterServices(s.app); err != nil {
+        return fmt.Errorf("failed to register services: %%w", err)
     }
+    return nil
+}
 
-    // register routes
-    userRoutes := users.NewRoutes(userService)
-    server.Register(userRoutes)
+func (s *Server) RegisterRoutes(path string, registrar RouteRegistrar) error {
+    group := s.Group(path)
+    if err := registrar.RegisterRoutes(group); err != nil {
+        return fmt.Errorf("failed to register routes: %%w", err)
+    }
+    s.routeGroups[path] = group
+    return nil
+}
 
-    return server, nil
-}`
-
-	routeGroupStr := `
 func (s *Server) Group(prefix string) *RouteGroup {
     return &RouteGroup{
         prefix:     prefix,
@@ -70,16 +96,10 @@ func (s *Server) Group(prefix string) *RouteGroup {
     }
 }
 
-func (s *Server) Register(registrar RouteRegistrar) {
-    group := s.Group("")
-    registrar.RegisterRoutes(group)
-}
-
 func (s *Server) Use(middleware ...Middleware) {
     s.middleware = append(s.middleware, middleware...)
-}`
+}
 
-	routeHandlerStr := `
 func (g *RouteGroup) Group(prefix string) *RouteGroup {
     return &RouteGroup{
         prefix:     g.prefix + prefix,
@@ -97,18 +117,19 @@ func (g *RouteGroup) Handle(method, path string, handler http.HandlerFunc) {
     
     finalHandler := handler
     
+    // apply group middleware
     for i := len(g.middleware) - 1; i >= 0; i-- {
         finalHandler = g.middleware[i](finalHandler)
     }
     
+    // apply server middleware
     for i := len(g.server.middleware) - 1; i >= 0; i-- {
         finalHandler = g.server.middleware[i](finalHandler)
     }
 
     g.server.mux.HandleFunc(fullPath, finalHandler)
-}`
+}
 
-	methodsStr := `
 func (g *RouteGroup) GET(path string, handler http.HandlerFunc) {
     g.Handle(http.MethodGet, path, handler)
 }
@@ -127,9 +148,8 @@ func (g *RouteGroup) PATCH(path string, handler http.HandlerFunc) {
 
 func (g *RouteGroup) DELETE(path string, handler http.HandlerFunc) {
     g.Handle(http.MethodDelete, path, handler)
-}`
+}
 
-	runServerStr := `
 func (s *Server) Run(port string) error {
     s.srv = &http.Server{
         Addr:    fmt.Sprintf(":%s", port),
@@ -157,69 +177,31 @@ func (s *Server) Run(port string) error {
         }()
 
         if err := s.shutdown(shutdownCtx); err != nil {
-            log.Printf("error during shutdown: %v", err)
+            log.Printf("error during shutdown: %%v", err)
         }
         serverStopCtx()
     }()
 
-    log.Printf("server starting on port %s", port)
+    log.Printf("server starting on port %%s", port)
     if err := s.srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-        return fmt.Errorf("error starting server: %w", err)
+        return fmt.Errorf("error starting server: %%w", err)
     }
 
     s.wg.Wait()
     return nil
-}`
+}
 
-	shutdownStr := `
 func (s *Server) shutdown(ctx context.Context) error {
     if err := s.srv.Shutdown(ctx); err != nil {
-        return fmt.Errorf("error shutting down http server: %w", err)
+        return fmt.Errorf("error shutting down http server: %%w", err)
     }
 
     if err := s.app.Shutdown(); err != nil {
-        return fmt.Errorf("error shutting down application: %w", err)
+        return fmt.Errorf("error shutting down application: %%w", err)
     }
 
     return nil
-}`
-
-	serverContent := fmt.Sprintf(`package server
-
-import (
-    "context"
-    "errors"
-    "fmt"
-    "log"
-    "net/http"
-    "os"
-    "os/signal"
-    "sync"
-    "syscall"
-    "time"
-
-    "%s/internal/app"
-    "%s/internal/infrastructure/config"
-    "%s/internal/core/services/user_service/service"
-    "%s/internal/app/routes/api/users"
-)
-%s
-%s
-%s
-%s
-%s
-%s
-%s
-%s`,
-		projectName, projectName, projectName, projectName,
-		serverStructStr,
-		middlewareTypeStr,
-		newServerStr,
-		routeGroupStr,
-		routeHandlerStr,
-		methodsStr,
-		runServerStr,
-		shutdownStr)
+}`, projectName, projectName)
 
 	serverDir := filepath.Join(projectPath, "internal", "infrastructure", "server")
 	if err := os.MkdirAll(serverDir, 0755); err != nil {
