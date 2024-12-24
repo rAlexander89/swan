@@ -29,28 +29,15 @@ type operation struct {
 
 func getOperations(ops string) []operation {
 	operations := []operation{}
-
 	for _, op := range ops {
 		switch op {
 		case Create:
 			operations = append(operations, operation{
 				name:     "Create",
-				function: "Create%s(ctx context.Context, %s *%[2]s.%s) error", // not a fan that the interpolation happens elsewhere. difficult to debug
+				function: "Create%s(ctx context.Context, %s *%s.%s) error",
 			})
 		}
-		// case Read:
-		// 	operations = append(operations, operation{
-		// 		name:     "Read",
-		// 		function: "Get%sByID(ctx context.Context, id string) (*%s.%s, error)",
-		// 	})
-		// case Index:
-		// 	operations = append(operations, operation{
-		// 		name:     "Index",
-		// 		function: "List%ss(ctx context.Context, filters map[string]interface{}) ([]*%s.%s, error)",
-		// 	})
-		// }
 	}
-
 	return operations
 }
 
@@ -66,10 +53,10 @@ func GenerateServiceImpl(domain, ops string) error {
 	}
 
 	domainSnake := utils.PascalToSnake(domain)
-
 	serviceDir := filepath.Join(pwd, "internal", "core", "services", fmt.Sprintf("%s_service", domainSnake))
 	implPath := filepath.Join(serviceDir, fmt.Sprintf("%s_service_impl.go", domainSnake))
 
+	// base implementation with registrar method
 	content := fmt.Sprintf(`package service
 
 import (
@@ -88,20 +75,35 @@ func New%[3]sService(repo repository.%[3]sRepository) %[3]sService {
     return &%[3]sServiceImpl{
         repo: repo,
     }
+}
+
+// Register implements the service registrar for %[3]s domain
+func Register%[3]sService(ctx context.Context, dependencies ...interface{}) error {
+    if len(dependencies) < 1 {
+        return fmt.Errorf("repository dependency required")
+    }
+
+    repo, ok := dependencies[0].(repository.%[3]sRepository)
+    if !ok {
+        return fmt.Errorf("invalid repository type")
+    }
+
+    return nil
 }`, projectName, domainSnake, domain)
 
+	// add CRUD operations based on flags
 	for _, op := range ops {
 		switch op {
 		case 'C':
 			content += fmt.Sprintf(`
 
-func (s *%[1]sServiceImpl) Create%[1]s(ctx context.Context, %[1]s *%[2]s.%[1]s) error {
-    if %[1]s == nil {
+func (s *%[1]sServiceImpl) Create%[1]s(ctx context.Context, %[2]s *%[2]s.%[1]s) error {
+    if %[2]s == nil {
         return Err%[1]sInvalid
     }
 
-    if err := s.repo.Create%[1]s(ctx, %[1]s); err != nil {
-        return fmt.Errorf("failed to create %[1]s: %%w", err)
+    if err := s.repo.Create%[1]s(ctx, %[2]s); err != nil {
+        return fmt.Errorf("failed to create %[2]s: %%w", err)
     }
 
     return nil
@@ -125,7 +127,6 @@ func GenerateServiceInterface(domain, ops string) error {
 
 	filePath := filepath.Join(serviceDir, fmt.Sprintf("%s_service.go", utils.PascalToSnake(domain)))
 
-	// check if file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return createNewInterface(domain, ops, filePath)
 	}
@@ -187,7 +188,6 @@ func updateExistingInterface(domain, ops, filePath string) error {
 		return fmt.Errorf("failed to parse existing file: %v", err)
 	}
 
-	// find the interface
 	var iface *ast.InterfaceType
 	ast.Inspect(node, func(n ast.Node) bool {
 		if typeSpec, ok := n.(*ast.TypeSpec); ok {
@@ -205,10 +205,8 @@ func updateExistingInterface(domain, ops, filePath string) error {
 		return fmt.Errorf("interface not found in file")
 	}
 
-	// add new methods
 	operations := getOperations(ops)
 	for _, op := range operations {
-		// check if method already exists
 		exists := false
 		for _, method := range iface.Methods.List {
 			if method.Names[0].Name == fmt.Sprintf("%s%s", op.name, utils.ToUpperFirst(domain)) {
@@ -218,7 +216,6 @@ func updateExistingInterface(domain, ops, filePath string) error {
 		}
 
 		if !exists {
-			// parse new method
 			expr := fmt.Sprintf("type T interface { %s }",
 				fmt.Sprintf(op.function,
 					utils.ToUpperFirst(domain),
@@ -237,7 +234,6 @@ func updateExistingInterface(domain, ops, filePath string) error {
 		}
 	}
 
-	// write updated file
 	file, err := os.Create(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to open file for writing: %v", err)

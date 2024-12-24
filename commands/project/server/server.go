@@ -33,18 +33,21 @@ import (
     "%s/internal/infrastructure/config"
 )
 
-// DomainRegistrar is implemented by domain packages to register their routes and services
-type DomainRegistrar interface {
-    Register(s *Server) error
+type ServiceRegistrar interface {
+    RegisterServices(app *app.App) error
+}
+
+type RouteRegistrar interface {
+    RegisterRoutes(group *RouteGroup) error
 }
 
 type Server struct {
-    srv        *http.Server
-    mux        *http.ServeMux
-    app        *app.App
-    wg         sync.WaitGroup
-    middleware []Middleware
-    registrars []DomainRegistrar
+    srv         *http.Server
+    mux         *http.ServeMux
+    app         *app.App
+    wg          sync.WaitGroup
+    middleware  []Middleware
+    routeGroups map[string]*RouteGroup
 }
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc
@@ -62,19 +65,26 @@ func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
     }
 
     return &Server{
-        mux:        http.NewServeMux(),
-        app:        application,
-        middleware: make([]Middleware, 0),
-        registrars: make([]DomainRegistrar, 0),
+        mux:         http.NewServeMux(),
+        app:         application,
+        middleware:  make([]Middleware, 0),
+        routeGroups: make(map[string]*RouteGroup),
     }, nil
 }
 
-// RegisterDomain allows domains to register their routes and services
-func (s *Server) RegisterDomain(r DomainRegistrar) error {
-    if err := r.Register(s); err != nil {
-        return fmt.Errorf("failed to register domain: %%w", err)
+func (s *Server) RegisterServices(registrar ServiceRegistrar) error {
+    if err := registrar.RegisterServices(s.app); err != nil {
+        return fmt.Errorf("failed to register services: %%w", err)
     }
-    s.registrars = append(s.registrars, r)
+    return nil
+}
+
+func (s *Server) RegisterRoutes(path string, registrar RouteRegistrar) error {
+    group := s.Group(path)
+    if err := registrar.RegisterRoutes(group); err != nil {
+        return fmt.Errorf("failed to register routes: %%w", err)
+    }
+    s.routeGroups[path] = group
     return nil
 }
 
@@ -193,13 +203,11 @@ func (s *Server) shutdown(ctx context.Context) error {
     return nil
 }`, projectName, projectName)
 
-	// create server directory
 	serverDir := filepath.Join(projectPath, "internal", "infrastructure", "server")
 	if err := os.MkdirAll(serverDir, 0755); err != nil {
 		return fmt.Errorf("failed to create server directory: %v", err)
 	}
 
-	// write server.go
 	serverPath := filepath.Join(serverDir, "server.go")
 	if err := os.WriteFile(serverPath, []byte(serverContent), 0644); err != nil {
 		return fmt.Errorf("failed to write server.go: %v", err)
