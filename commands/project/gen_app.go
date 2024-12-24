@@ -15,6 +15,10 @@ func WriteAppModule(projectPath string) error {
 		return pErr
 	}
 
+	if err := app.WritePostgres(projectName); err != nil {
+		return err
+	}
+
 	if err := app.WritePostgresConnectionFile(projectPath); err != nil {
 		return err
 	}
