@@ -140,43 +140,44 @@ func createNewInterface(domain, ops, filePath string) error {
 		return fmt.Errorf("no valid operations provided")
 	}
 
-	upperDomain := utils.ToUpperFirst(domain)
-	lowerDomain := strings.ToLower(domain)
-
-	var functions []string
-	for _, op := range operations {
-		fn := fmt.Sprintf(op.function, upperDomain, lowerDomain, domain, upperDomain)
-		functions = append(functions, fn)
-	}
-
 	projectName, pErr := utils.GetProjectName()
 	if pErr != nil {
 		return pErr
 	}
 
-	content := fmt.Sprintf(`package service
+	upperDomain := utils.ToUpperFirst(domain)
+	lowerDomain := strings.ToLower(domain)
+
+	var functions []string
+	for _, op := range operations {
+		fn := fmt.Sprintf(op.function, upperDomain, lowerDomain, lowerDomain, upperDomain)
+		functions = append(functions, fn)
+	}
+
+	templateStr := `package service
 
 import (
     "context"
     "errors"
     
-    "%s/internal/core/domains/%s"
+    "%[1]s/internal/core/domains/%[2]s"
 )
 
 var (
-    Err%sInvalid = errors.New("invalid %s")
-    Err%sExists  = errors.New("%s already exists")
+    Err%[3]sInvalid = errors.New("invalid %[2]s")
+    Err%[3]sExists  = errors.New("%[2]s already exists")
 )
 
-type %sService interface {
-    %s
-}`,
-		projectName,
-		lowerDomain,
-		upperDomain, lowerDomain,
-		upperDomain, lowerDomain,
-		upperDomain,
-		strings.Join(functions, "\n    "))
+type %[3]sService interface {
+    %[4]s
+}`
+
+	content := fmt.Sprintf(templateStr,
+		projectName,                       // [1]
+		lowerDomain,                       // [2]
+		upperDomain,                       // [3]
+		strings.Join(functions, "\n    "), // [4]
+	)
 
 	return os.WriteFile(filePath, []byte(content), 0644)
 }

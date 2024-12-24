@@ -31,6 +31,7 @@ import (
     
     "%s/internal/app"
     "%s/internal/infrastructure/config"
+    "%s/internal/infrastructure/routes/routes.go"
 )
 
 type ServiceRegistrar interface {
@@ -64,12 +65,18 @@ func NewServer(ctx context.Context, cfg *config.Config) (*Server, error) {
         return nil, fmt.Errorf("failed to initialize application: %%w", err)
     }
 
-    return &Server{
+    srv := &Server{
         mux:         http.NewServeMux(),
         app:         application,
         middleware:  make([]Middleware, 0),
         routeGroups: make(map[string]*RouteGroup),
-    }, nil
+    }
+
+    if err := routes.RegisterRoutes(srv); err != nil {
+        return nil, fmt.Errorf("failed to register routes: %%w", err)
+    }
+
+    return srv, nil
 }
 
 func (s *Server) RegisterServices(registrar ServiceRegistrar) error {
@@ -152,7 +159,7 @@ func (g *RouteGroup) DELETE(path string, handler http.HandlerFunc) {
 
 func (s *Server) Run(port string) error {
     s.srv = &http.Server{
-        Addr:    fmt.Sprintf(":%s", port),
+        Addr:    fmt.Sprintf(":%%s", port),
         Handler: s.mux,
     }
 
@@ -201,7 +208,7 @@ func (s *Server) shutdown(ctx context.Context) error {
     }
 
     return nil
-}`, projectName, projectName)
+}`, projectName, projectName, projectName)
 
 	serverDir := filepath.Join(projectPath, "internal", "infrastructure", "server")
 	if err := os.MkdirAll(serverDir, 0755); err != nil {
