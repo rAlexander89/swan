@@ -186,15 +186,6 @@ var (
     once sync.Once
 )
 
-// Config defines required postgres configuration
-type Config struct {
-    URI                   string
-    MaxOpenConnections    int
-    MaxIdleConnections    int
-    MaxConnectionIdleTime int
-    MaxConnectionLifetime int
-}
-
 // NewRepository creates a singleton postgres repository
 func NewRepository(ctx context.Context, cfg Config) (*Repository, error) {
     var initErr error
