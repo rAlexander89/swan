@@ -19,8 +19,7 @@ func WritePostgres(projectPath string) error {
 }
 
 func postgresGoFile() string {
-	genCode := `
-  // internal/app/repositories/postgres/postgres.go
+	genCode := `// internal/app/repositories/postgres/postgres.go
 package postgres
 
 import (
@@ -58,7 +57,7 @@ func New(ctx context.Context, cfg Config) (*Connection, error) {
         return nil, fmt.Errorf("failed to verify postgres connection: %w", err)
     }
 
-  fmt.Println("connected to postgres version %s",  version)
+    fmt.Printf("connected to postgres version %s",  version)
 
     // set connection pool settings
     db.SetMaxOpenConns(cfg.MaxOpenConnections)
@@ -141,7 +140,7 @@ func (c *Connection) BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx,
 
 // Close closes the database connection
 func (c *Connection) Close() error {
-  if c.db: == nil {
+  if c.db == nil {
         return nil
     }
     

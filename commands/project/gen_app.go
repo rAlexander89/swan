@@ -33,6 +33,10 @@ func WriteAppModule(projectPath string) error {
 		return err
 	}
 
+	if err := app.WriteRepository(projectPath); err != nil {
+		return err
+	}
+
 	if err := getPostgresDriver(); err != nil {
 		return err
 	}
@@ -61,7 +65,7 @@ func WriteAppModule(projectPath string) error {
 
         postgresDB, err := postgres.NewRepository(ctx, postgresConfig)
         if err != nil {
-            initErr = fmt.Errorf("failed to initialize postgres repository: %w", err)
+            fmt.Errorf("failed to initialize postgres repository: %w", err)
             return
         }
 

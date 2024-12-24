@@ -18,54 +18,38 @@ func WriteMain(projectPath string) error {
 	mainTmpl := `package main
 
 import (
-   "context"
-   "fmt"
-   "log"
-   "os"
-   "os/signal"
-   "syscall"
-   "time"
+    "context"
+    "fmt"
+    "log"
 
-   "{{.ProjectName}}/internal/app"
-   "{{.ProjectName}}/internal/infrastructure/config"
-   "{{.ProjectName}}/internal/infrastructure/server"
-   "{{.ProjectName}}/internal/app/handlers/api"
+    "{{.ProjectName}}/internal/infrastructure/config"
+    "{{.ProjectName}}/internal/infrastructure/server"
 )
 
 func main() {
-   // load configuration
-   env := config.GetEnv()
-   cfg, err := config.LoadConfig(env)
-   if err != nil {
-       log.Fatalf("failed to load config: %v", err)
-   }
+    // load configuration
+    env := config.GetEnv()
+    cfg, err := config.LoadConfig(env)
+    if err != nil {
+        log.Fatalf("failed to load config: %v", err)
+    }
 
-   ctx := context.Background()
+    ctx := context.Background()
 
-   // initialize app with services
-   app, err := app.NewApp(ctx, cfg)
-   if err != nil {
-       log.Fatalf("failed to initialize app: %v", err)
-   }
-   defer app.Shutdown()
+    // initialize server (routes are registered during initialization)
+    srv, err := server.NewServer(ctx, cfg)
+    if err != nil {
+        log.Fatalf("failed to initialize server: %v", err)
+    }
 
-   // initialize server
-   srv, err := server.NewServer(ctx, cfg)
-   if err != nil {
-       log.Fatalf("failed to initialize server: %v", err)
-   }
+    fmt.Printf("starting application in %s mode...\n", env)
 
-   // register routes with server
-   apiGroup := srv.Group("/api")
-   v1Group := apiGroup.Group("/v1")
-
-   fmt.Printf("starting application in %s mode...\n", env)
-
-   // start server (blocking)
-   if err := srv.Run("8080"); err != nil {
-       log.Fatalf("server error: %v", err)
-   }
-}`
+    // start server (blocking)
+    if err := srv.Run("8080"); err != nil {
+        log.Fatalf("server error: %v", err)
+    }
+}
+  `
 
 	data := struct {
 		ProjectName string
