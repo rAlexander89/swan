@@ -10,8 +10,13 @@ import (
 	project "github.com/rAlexander89/swan/commands/project/handlers"
 	routes "github.com/rAlexander89/swan/commands/project/routes"
 	"github.com/rAlexander89/swan/commands/project/service"
+	"github.com/rAlexander89/swan/nodes"
 	"github.com/rAlexander89/swan/utils"
 )
+
+func init() {
+	nodes.RegisterCommand("fly", Fly)
+}
 
 func Fly(args []string) error {
 	if len(args) < 1 {

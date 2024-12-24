@@ -9,6 +9,7 @@ import (
 	_ "github.com/rAlexander89/swan/commands/domain"
 	_ "github.com/rAlexander89/swan/commands/project"
 	_ "github.com/rAlexander89/swan/commands/project/db"
+	_ "github.com/rAlexander89/swan/commands/project/fly"
 	"github.com/rAlexander89/swan/nodes"
 )
 
@@ -30,6 +31,8 @@ func main() {
 		fmt.Println("no command provided")
 		os.Exit(1)
 	}
+
+	fly.Fly()
 
 	// load node tree
 	root, err := nodes.LoadNodes()
