@@ -83,7 +83,7 @@ func Hatch(args []string) error {
 	// always create repository interface
 	operations = append(operations, operation{
 		name:     "repository",
-		filename: fmt.Sprintf("%s_repository.go", domain),
+		filename: fmt.Sprintf("%s_repository.go", domain_snake),
 		content:  persistenceContnent,
 	})
 
