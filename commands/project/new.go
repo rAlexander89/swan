@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/rAlexander89/swan/commands/project/server"
 	"github.com/rAlexander89/swan/nodes"
 )
 
@@ -79,6 +80,18 @@ func New(args []string) error {
 
 	if err := WriteConfigLoader(projectPath); err != nil {
 		return fmt.Errorf("failed to write config loader file: %v", err)
+	}
+
+	if err := WriteMain(projectPath); err != nil {
+		return fmt.Errorf("failed to write main.go: %v", err)
+	}
+
+	if err := WriteAppModule(projectPath); err != nil {
+		return fmt.Errorf("failed to write app.go: %v", err)
+	}
+
+	if err := server.WriteServer(projectPath); err != nil {
+		return fmt.Errorf("failed to write server.go: %v", err)
 	}
 
 	// before go mod init
