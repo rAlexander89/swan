@@ -28,11 +28,11 @@ func WriteAppModule(projectPath string) error {
 	if err := app.WritePostgres(projectName); err != nil {
 		return err
 	}
-	if err := app.WriteRepository(projectName); err != nil {
-		return err
-	}
 
 	if err := app.WritePostgresConnectionFile(projectPath); err != nil {
+		return err
+	}
+	if err := app.WriteRepository(projectName); err != nil {
 		return err
 	}
 
