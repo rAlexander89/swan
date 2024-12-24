@@ -32,8 +32,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	fly.Fly()
-
 	// load node tree
 	root, err := nodes.LoadNodes()
 	if err != nil {
