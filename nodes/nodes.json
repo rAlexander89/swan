@@ -87,6 +87,28 @@
         ]
       }
     },
+    "fly": {
+      "name": "fly",
+      "config": {
+        "package": "commands/fly",
+        "file": "fly.go",
+        "function": "Fly",
+        "args": [
+          {
+            "name": "domain",
+            "type": "string",
+            "required": true
+          },
+          {
+            "c": {
+              "type": "string",
+              "required": false
+            }
+          }
+        ]
+      },
+      "branches": {}
+    },
     "db": {
       "name": "db",
       "config": null,
