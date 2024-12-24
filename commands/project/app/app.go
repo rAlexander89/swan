@@ -154,7 +154,9 @@ func (c *Connection) Close() error {
 func WriteRepository(projPath string) error {
 	repoContent := genRepositoryCode()
 
-	if err := os.WriteFile(projPath, []byte(repoContent), 0644); err != nil {
+	repoPath := filepath.Join(projPath, "internal", "app", "repositories", "postgres", "repository.go")
+
+	if err := os.WriteFile(repoPath, []byte(repoContent), 0644); err != nil {
 		return fmt.Errorf("failed to write repository.go: %v", err)
 	}
 
