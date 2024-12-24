@@ -18,30 +18,27 @@ func generateCreate(domain string) (string, error) {
 		return "", fmt.Errorf("error reading struct fields for %s: %v ", domain, sErr)
 	}
 
+	projectName, err := utils.GetProjectName()
+	if err != nil {
+		return "", fmt.Errorf("failed to get project name: %w", err)
+	}
+
 	columns := make([]string, 0, len(structFields))
 	placeholders := make([]string, 0, len(structFields))
 	valueBindings := make([]string, 0, len(structFields))
 
+	domainLower := strings.ToLower(domain)
+	domainTitle := utils.ToUpperFirst(domain)
+	domainTable := utils.ToSnakeCase(domain)
+
 	for i, field := range structFields {
 		columns = append(columns, utils.ToSnakeCase(field.Name))
 		placeholders = append(placeholders, fmt.Sprintf("$%d", i+1))
-		valueBindings = append(valueBindings, fmt.Sprintf("%s.%s", strings.ToLower(domain), field.Name))
+		// use the original PascalCase field name from the struct
+		valueBindings = append(valueBindings, fmt.Sprintf("%s.%s", domainLower, field.Name))
 	}
 
-	projName, pErr := utils.GetProjectName()
-	if pErr != nil {
-		return "", pErr
-	}
-
-	// interplate values
-	// 1. domain string is already PascalCase
-	allLower := strings.ToLower(domain)
-	packageName := allLower
-
-	snake_case_domain := utils.PascalToSnake(domain)
-	fileName := snake_case_domain
-
-	code := fmt.Sprintf(`package %[1]s
+	template := `package %[1]s
 
 import (
     "context"
@@ -49,18 +46,18 @@ import (
     "%[2]s/internal/core/domains/%[3]s"
 )
 
-func (r *Repository) Create%[4]s(ctx context.Context, %[1]s *%[1]s.%[4]s) error {
-    query := `+"`"+`
-        insert into %[5]s (
+func (r *Repository) Create%[4]s(ctx context.Context, %[3]s *%[1]s.%[4]s) error {
+    query := ` + "`" + `
+        insert into %[5]ss (
             %[6]s
         ) values (
             %[7]s
         )
-    `+"`"+`
+    ` + "`" + `
 
     now := time.Now().UTC()
-    %[1]s.CreatedAt = now
-    %[1]s.UpdatedAt = now
+    %[3]s.CreatedAt = now
+    %[3]s.UpdatedAt = now
 
     _, err := r.conn.ExecContext(
         ctx,
@@ -69,17 +66,18 @@ func (r *Repository) Create%[4]s(ctx context.Context, %[1]s *%[1]s.%[4]s) error 
     )
 
     return err
-}`,
-		packageName,                           // [1] package name
-		projName,                              // [2] project import path
-		fileName,                              // [3] snake_case domain folder
-		domain,                                // [4] PascalCase type names
-		fmt.Sprintf("%ss", snake_case_domain), // [5] pluralized snake_case table
-		columns,                               // [6] column names
-		placeholders,                          // [7] sql placeholders
-		valueBindings)                         // [8] value bindings
+}`
 
-	return code, nil
+	return fmt.Sprintf(template,
+		domain,                                   // [1]
+		projectName,                              // [2]
+		domainLower,                              // [3]
+		domainTitle,                              // [4]
+		domainTable,                              // [5]
+		strings.Join(columns, ",\n            "), // [6]
+		strings.Join(placeholders, ",\n            "), // [7]
+		strings.Join(valueBindings, ",\n        "),    // [8]
+	), nil
 }
 
 type Field struct {
