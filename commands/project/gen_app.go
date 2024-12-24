@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/rAlexander89/swan/commands/project/app"
 	"github.com/rAlexander89/swan/utils"
 )
 
@@ -12,6 +13,10 @@ func WriteAppModule(projectPath string) error {
 	projectName, pErr := utils.GetProjectName()
 	if pErr != nil {
 		return pErr
+	}
+
+	if err := app.WritePostgresConnectionFile(projectPath); err != nil {
+		return err
 	}
 
 	shutdownFuncStr := `
