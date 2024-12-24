@@ -46,9 +46,6 @@
               "api": {
                 "type": "directory",
                 "children": {
-                  "api.go": {
-                    "type": "file"
-                  },
                   "controller.go": {
                     "type": "file"
                   }
@@ -66,9 +63,6 @@
                     "type": "file"
                   },
                   "postgres.go": {
-                    "type": "file"
-                  },
-                  "repository.go": {
                     "type": "file"
                   }
                 }
