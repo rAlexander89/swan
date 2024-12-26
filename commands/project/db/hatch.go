@@ -147,14 +147,9 @@ func Hatch(args []string) error {
 		return fmt.Errorf("failed to generate repository port: %v", err)
 	}
 
-	// 3. service interface
-	if err := service.GenerateServiceInterface(domain, ops); err != nil {
-		return fmt.Errorf("failed to generate service interface: %v", err)
-	}
-
-	// 4. service implementation
-	if err := service.GenerateServiceImpl(domain, ops); err != nil {
-		return fmt.Errorf("failed to generate service implementation: %v", err)
+	// 3. generate domains services
+	if err := service.GenerateService(domain, ops); err != nil {
+		return fmt.Errorf("failed to generate service: %v", err)
 	}
 
 	return nil
