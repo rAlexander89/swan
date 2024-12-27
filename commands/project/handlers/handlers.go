@@ -48,7 +48,7 @@ import (
     "net/http"
     
     "{{.ProjectName}}/internal/core/domains/{{.DomainLower}}"
-    "service {{.ProjectName}}/internal/core/services/{{.DomainSnake}}_service"
+    service "{{.ProjectName}}/internal/core/services/{{.DomainSnake}}_service"
     "{{.ProjectName}}/internal/infrastructure/server"
 )`,
 
