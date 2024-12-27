@@ -9,7 +9,6 @@ import (
 
 	project "github.com/rAlexander89/swan/commands/project/handlers"
 	routes "github.com/rAlexander89/swan/commands/project/routes"
-	"github.com/rAlexander89/swan/commands/project/service"
 	"github.com/rAlexander89/swan/nodes"
 	"github.com/rAlexander89/swan/utils"
 )
@@ -56,15 +55,6 @@ func Fly(args []string) error {
 
 	if _, err := os.Stat(domainPath); os.IsNotExist(err) {
 		return fmt.Errorf("domain %s not found at %s", domain, domainPath)
-	}
-
-	// generate service
-	if err := service.GenerateServiceInterface(domain, ops); err != nil {
-		return fmt.Errorf("error generating service interface: %v", err)
-	}
-
-	if err := service.GenerateServiceImpl(domain, ops); err != nil {
-		return fmt.Errorf("error generating service implementation: %v", err)
 	}
 
 	// generate handler
