@@ -38,7 +38,7 @@ func generateCreate(domain string) (string, error) {
 		valueBindings = append(valueBindings, fmt.Sprintf("%s.%s", domainLower, field.Name))
 	}
 
-	template := `package %[1]s
+	template := `package %[3]s
 
 import (
     "context"
@@ -46,7 +46,7 @@ import (
     "%[2]s/internal/core/domains/%[3]s"
 )
 
-func (r *Repository) Create%[4]s(ctx context.Context, %[3]s *%[1]s.%[4]s) error {
+func (r *Repository) Create%[4]s(ctx context.Context, %[3]s *%[3]s.%[4]s) error {
     query := ` + "`" + `
         insert into %[5]ss (
             %[6]s
