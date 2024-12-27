@@ -80,7 +80,7 @@ func generateTypes(domain, ops, serviceDir, projectName string) error {
 
 	var functions []string
 	for _, op := range operations {
-		fn := fmt.Sprintf(op.function, upperDomain, lowerDomain, domain, upperDomain)
+		fn := fmt.Sprintf(op.function, upperDomain, lowerDomain, lowerDomain, upperDomain)
 		functions = append(functions, fn)
 	}
 
