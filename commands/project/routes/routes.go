@@ -22,6 +22,7 @@ type routeData struct {
 	ProjectName string
 	DomainTitle string
 	DomainLower string
+	DomainSnake string
 	Operations  string
 }
 
@@ -36,6 +37,7 @@ func WriteRoutes(projectPath, domain, ops string) error {
 		ProjectName: projectName,
 		DomainTitle: utils.ToUpperFirst(domain),
 		DomainLower: strings.ToLower(domain),
+		DomainSnake: utils.ToSnakeCase(domain),
 		Operations:  ops,
 	}
 
@@ -46,14 +48,14 @@ func WriteRoutes(projectPath, domain, ops string) error {
 		"infrastructure",
 		"server",
 		"routes",
-		data.DomainLower,
+		data.DomainSnake,
 	)
 	if err := os.MkdirAll(routesDir, 0755); err != nil {
 		return fmt.Errorf("failed to create routes directory: %v", err)
 	}
 
 	// create routes file
-	routesPath := filepath.Join(routesDir, fmt.Sprintf("%s_routes.go", data.DomainLower))
+	routesPath := filepath.Join(routesDir, fmt.Sprintf("%s_routes.go", data.DomainSnake))
 
 	tmpl := getRoutesTemplate()
 
