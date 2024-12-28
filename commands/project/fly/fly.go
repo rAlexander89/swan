@@ -62,6 +62,11 @@ func Fly(args []string) error {
 		return fmt.Errorf("error generating handler: %v", err)
 	}
 
+	// generate routes
+	if err := routes.WriteRoutes(".", domain, ops); err != nil {
+		return fmt.Errorf("error generating routes: %v", err)
+	}
+
 	// register with api routes
 	if err := routes.WriteTopLevelRoutes(".", domain, ops); err != nil {
 		return fmt.Errorf("error registering routes: %v", err)
