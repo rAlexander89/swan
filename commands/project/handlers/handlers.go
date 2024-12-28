@@ -135,11 +135,12 @@ func WriteHandler(projectPath, domain, ops string) error {
 	handlerDir := filepath.Join(
 		projectPath,
 		"internal",
-		"app",
+		"infrastructure",
+		"http",
 		"handlers",
-		"api",
 		data.DomainLower+"s",
 	)
+
 	if err := os.MkdirAll(handlerDir, 0755); err != nil {
 		return fmt.Errorf("failed to create handler directory: %v", err)
 	}
