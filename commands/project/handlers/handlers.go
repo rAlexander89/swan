@@ -48,17 +48,17 @@ import (
     "net/http"
     
     "{{.ProjectName}}/internal/core/domains/{{.DomainLower}}"
-    service "{{.ProjectName}}/internal/core/services/{{.DomainSnake}}_service"
+    {{.DomainSnake}}_service "{{.ProjectName}}/internal/core/services/{{.DomainSnake}}_service"
     "{{.ProjectName}}/internal/infrastructure/server"
 )`,
 
 		handlerDefinition: `
 type {{.DomainTitle}}Handler struct {
-    service service.{{.DomainTitle}}Service
+    service {{.DomainSnake}}_service.Service
 }`,
 
 		constructor: `
-func New{{.DomainTitle}}Handler(service service.{{.DomainTitle}}Service) *{{.DomainTitle}}Handler {
+func New{{.DomainTitle}}Handler(service {{.DomainSnake}}_service.Service) *{{.DomainTitle}}Handler {
     return &{{.DomainTitle}}Handler{
         service: service,
     }
