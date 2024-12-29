@@ -23,6 +23,7 @@ type routeData struct {
 	DomainTitle string
 	DomainLower string
 	DomainSnake string
+	DomainKebab string
 	Operations  string
 }
 
@@ -38,6 +39,7 @@ func WriteRoutes(projectPath, domain, ops string) error {
 		DomainTitle: utils.ToUpperFirst(domain),
 		DomainLower: strings.ToLower(domain),
 		DomainSnake: utils.ToSnakeCase(domain),
+		DomainKebab: utils.PascalToKebab(domain),
 		Operations:  ops,
 	}
 
@@ -66,7 +68,7 @@ func getRoutesTemplate() string {
 	return `package {{.DomainLower}}
 
 import (
-    "{{.ProjectName}}/internal/app/handlers/api/{{.DomainLower}}s"
+    "{{.ProjectName}}/internal/infrastructure/http/handlers/{{.DomainLower}}s"
     "{{.ProjectName}}/internal/infrastructure/server"
 )
 
@@ -80,36 +82,16 @@ func New{{.DomainTitle}}Routes(handler *{{.DomainLower}}s.{{.DomainTitle}}Handle
     }
 }
 
-// RegisterRoutes registers the {{.DomainLower}} routes with the given route group
 func (r *{{.DomainTitle}}Routes) RegisterRoutes(group *server.RouteGroup) {
-    {{if contains .Operations "C"}}
-    // POST /{{.DomainLower}}s
-    group.POST("/{{.DomainLower}}s", r.handler.Create)
-    {{end}}
-    {{if contains .Operations "R"}}
-    // GET /{{.DomainLower}}s/:id
-    group.GET("/{{.DomainLower}}s/:id", r.handler.Get)
-    {{end}}
-    {{if contains .Operations "U"}}
-    // PUT /{{.DomainLower}}s/:id
-    group.PUT("/{{.DomainLower}}s/:id", r.handler.Update)
-    {{end}}
-    {{if contains .Operations "D"}}
-    // DELETE /{{.DomainLower}}s/:id
-    group.DELETE("/{{.DomainLower}}s/:id", r.handler.Delete)
-    {{end}}
-    {{if contains .Operations "I"}}
-    // GET /{{.DomainLower}}s
-    group.GET("/{{.DomainLower}}s", r.handler.Index)
+    {{if hasOperation .Operations "C"}}
+    group.POST("/{{.DomainKebab}}s", r.handler.Create)
     {{end}}
 }`
 }
 
 func writeTemplateToFile(path, tmpl string, data routeData) error {
 	funcMap := template.FuncMap{
-		"contains": func(ops string, op rune) bool {
-			return strings.ContainsRune(ops, op)
-		},
+		"hasOperation": strings.Contains,
 	}
 
 	t, err := template.New("routes").Funcs(funcMap).Parse(tmpl)
@@ -123,9 +105,5 @@ func writeTemplateToFile(path, tmpl string, data routeData) error {
 	}
 	defer f.Close()
 
-	if err := t.Execute(f, data); err != nil {
-		return fmt.Errorf("failed to execute template: %v", err)
-	}
-
-	return nil
+	return t.Execute(f, data)
 }
