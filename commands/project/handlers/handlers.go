@@ -138,7 +138,7 @@ func WriteHandler(projectPath, domain, ops string) error {
 		"infrastructure",
 		"http",
 		"handlers",
-		data.DomainLower+"s",
+		data.DomainSnake,
 	)
 
 	if err := os.MkdirAll(handlerDir, 0755); err != nil {
