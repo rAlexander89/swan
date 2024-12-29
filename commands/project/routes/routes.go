@@ -91,19 +91,18 @@ func (r *{{.DomainTitle}}Routes) RegisterRoutes(group *server.RouteGroup) {
 
 func writeTemplateToFile(path, tmpl string, data routeData) error {
 	funcMap := template.FuncMap{
-		"hasOperation": strings.Contains,
+		"hasOperation": func(ops, op string) bool {
+			return strings.ContainsAny(ops, op)
+		},
 	}
-
 	t, err := template.New("routes").Funcs(funcMap).Parse(tmpl)
 	if err != nil {
 		return fmt.Errorf("failed to parse template: %v", err)
 	}
-
 	f, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("failed to create file: %v", err)
 	}
 	defer f.Close()
-
 	return t.Execute(f, data)
 }
