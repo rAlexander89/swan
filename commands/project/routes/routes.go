@@ -68,7 +68,7 @@ func getRoutesTemplate() string {
 	return `package {{.DomainLower}}
 
 import (
-    "{{.ProjectName}}/internal/infrastructure/http/handlers/{{.DomainLower}}s"
+    "{{.ProjectName}}/internal/infrastructure/http/handlers/{{.DomainSnake}}"
     "{{.ProjectName}}/internal/infrastructure/server"
 )
 
