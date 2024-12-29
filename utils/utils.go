@@ -218,3 +218,14 @@ func GetProjectName() (string, error) {
 
 	return moduleFields[1], nil
 }
+
+func PascalToKebab(s string) string {
+	var result strings.Builder
+	for i, r := range s {
+		if i > 0 && unicode.IsUpper(r) {
+			result.WriteRune('-')
+		}
+		result.WriteRune(unicode.ToLower(r))
+	}
+	return result.String()
+}
