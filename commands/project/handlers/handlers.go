@@ -125,7 +125,7 @@ func WriteHandler(projectPath, domain, ops string) error {
 
 	data := templateData{
 		ProjectName: projectName,
-		PackageName: strings.ToLower(domain),
+		PackageName: utils.PascalToSnake(domain),
 		DomainTitle: utils.ToUpperFirst(domain),
 		DomainLower: strings.ToLower(domain),
 		DomainSnake: utils.PascalToSnake(domain),
@@ -138,7 +138,7 @@ func WriteHandler(projectPath, domain, ops string) error {
 		"infrastructure",
 		"http",
 		"handlers",
-		data.DomainLower+"s",
+		data.DomainSnake,
 	)
 
 	if err := os.MkdirAll(handlerDir, 0755); err != nil {

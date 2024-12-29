@@ -65,7 +65,7 @@ func WriteRoutes(projectPath, domain, ops string) error {
 }
 
 func getRoutesTemplate() string {
-	return `package {{.DomainLower}}
+	return `package {{.DomainSnake}}
 
 import (
     "{{.ProjectName}}/internal/infrastructure/http/handlers/{{.DomainSnake}}"
@@ -73,7 +73,7 @@ import (
 )
 
 type {{.DomainTitle}}Routes struct {
-    handler *{{.DomainLower}}s.{{.DomainTitle}}Handler
+    handler *{{.DomainSnake}}.{{.DomainTitle}}Handler
 }
 
 func New{{.DomainTitle}}Routes(handler *{{.DomainLower}}s.{{.DomainTitle}}Handler) *{{.DomainTitle}}Routes {
