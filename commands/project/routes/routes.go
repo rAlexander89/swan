@@ -76,7 +76,7 @@ type {{.DomainTitle}}Routes struct {
     handler *{{.DomainSnake}}.{{.DomainTitle}}Handler
 }
 
-func New{{.DomainTitle}}Routes(handler *{{.DomainLower}}s.{{.DomainTitle}}Handler) *{{.DomainTitle}}Routes {
+func New{{.DomainTitle}}Routes(handler *{{.DomainSnake}}.{{.DomainTitle}}Handler) *{{.DomainTitle}}Routes {
     return &{{.DomainTitle}}Routes{
         handler: handler,
     }
