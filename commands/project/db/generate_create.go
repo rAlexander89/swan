@@ -44,9 +44,11 @@ import (
     "context"
     "time"
     "%[2]s/internal/core/domains/%[3]s"
+    "%[2]s/internal/app/repositories/postgres"
+
 )
 
-func (r *Repository) Create%[4]s(ctx context.Context, %[3]s *%[3]s.%[4]s) error {
+func (r *postgres.Repository) Create%[4]s(ctx context.Context, %[3]s *%[3]s.%[4]s) error {
     query := ` + "`" + `
         insert into %[5]ss (
             %[6]s
