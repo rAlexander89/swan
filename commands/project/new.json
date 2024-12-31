@@ -45,11 +45,7 @@
             "children": {
               "api": {
                 "type": "directory",
-                "children": {
-                  "controller.go": {
-                    "type": "file"
-                  }
-                }
+                "children": {}
               }
             }
           },
@@ -85,11 +81,7 @@
           },
           "services": {
             "type": "directory",
-            "children": {
-              "services.go": {
-                "type": "file"
-              }
-            }
+            "children": {}
           }
         }
       },
